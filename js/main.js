@@ -6,13 +6,48 @@ var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wall
 var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = false;
 
 var keyboard = {};
-var player = {speed:0.08};
+var player = {speed:0.08, rightPosition:-1.8, leftPosition:1.8};
+
+var loadingScreen = {
+	scene: new THREE.Scene(),
+	camera: new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 100),
+};
+var loadingManager = null;
+var RESOURCES_LOADED = false;
+
+var models = {
+	car: {
+		obj:"assets/models/car.obj",
+		mtl:"assets/models/car.mtl",
+		mesh: null
+	}
+};
+var meshes = {};
 
 function init() {
+
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 100);
 	var textureLoader = new THREE.TextureLoader();
 	var startZ = 0;
+
+	var loadingText = document.createElement('div');
+	loadingText.setAttribute('id', 'loading-text');
+	loadingText.innerHTML = "Loading game...";
+	loadingText.style.top = window.innerHeight / 2.4 + "px";
+	document.body.appendChild(loadingText);
+
+	loadingManager = new THREE.LoadingManager();
+	loadingManager.onProgress = function(item, loaded, total){
+		console.log(item, loaded, total);
+	};
+	loadingManager.onLoad = function(){
+		console.log("Loaded all resources");
+		RESOURCES_LOADED = true;
+		onResourcesLoaded();
+		document.getElementById("loading-text").remove();
+	};
+
 
 	/*********** ROAD ***********/
 
@@ -95,6 +130,34 @@ function init() {
 		scene.add(roofObj);
 	}
 
+	/*********** MODELS ***********/
+
+	for(var _key in models) {
+		(function(key){
+
+			var mtlLoader = new THREE.MTLLoader(loadingManager);
+			mtlLoader.load(models[key].mtl, function(materials) {
+
+				materials.preload();
+				var objLoader = new THREE.OBJLoader(loadingManager);
+				objLoader.setMaterials(materials);
+				objLoader.load(models[key].obj, function(mesh){
+
+					mesh.traverse(function(node) {
+						if( node instanceof THREE.Mesh) {
+							if( 'castShadow' in models[key] ) node.castShadow = models[key].castShadow;
+							else node.castShadow = true;
+
+							if( 'receiveShadow' in models[key] ) node.receiveShadow = models[key].castShadow;
+							else node.receiveShadow = true;
+						}
+					});
+					models[key].mesh = mesh;
+				});
+			});
+		})(_key);
+	}
+
 	/*********** LIGHT ***********/
 
 	ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
@@ -107,7 +170,7 @@ function init() {
 	light.shadow.camera.far = 25;
 	scene.add(light);
 
-	camera.position.set(0, 1.8, -10);
+	camera.position.set(0, 2, -10);
 	camera.lookAt(new THREE.Vector3(0, 1.8, 0));
 
 	renderer = new THREE.WebGLRenderer();
@@ -124,8 +187,25 @@ function init() {
 	animate();
 }
 
+
+function onResourcesLoaded() {
+	
+	meshes["player"] = models.car.mesh.clone();
+	meshes["player"].position.set(player.rightPosition, 0, -7);
+	meshes["player"].rotation.y += Math.PI;
+	meshes["player"].scale.set(2, 2, 1);
+	scene.add(meshes["player"]);
+}
+
+
 function animate() {
 	
+	if( RESOURCES_LOADED == false) {
+		requestAnimationFrame(animate);
+		renderer.render(loadingScreen.scene, loadingScreen.camera);
+		return;
+	}
+
 	requestAnimationFrame(animate);
 
 	// if(keyboard[67]) {
@@ -139,9 +219,17 @@ function animate() {
 
 	stats.begin();
 
+	if(keyboard[39] || keyboard[68]) {
+		meshes["player"].position.x = player.rightPosition;
+	}
+	if(keyboard[37] || keyboard[65]) {
+		meshes["player"].position.x = player.leftPosition;
+	}
+
 	camera.position.z += player.speed;
 	camera.lookAt.z += player.speed;
 	light.position.z += player.speed;
+	meshes["player"].position.z += player.speed;
 
 	/******** Rerendering to create infinite illusion ********/
 
