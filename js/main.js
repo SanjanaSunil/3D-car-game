@@ -7,10 +7,11 @@ var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = fals
 
 var keyboard = {};
 var player = {
-				speed:0.08,
+				speed:0.1,
 				rightPosition:-1.8,
 				leftPosition:1.8,
-				jumpSpeed:0.1,
+				jumpSpeed:0.2,
+				maxHeight:2.5,
 				jumping: false
 			};
 
@@ -229,9 +230,9 @@ function animate() {
 	if(keyboard[37] || keyboard[65]) meshes["player"].position.x = player.leftPosition;
 	if(keyboard[32] && !player.jumping) player.jumping = true;
 
-	if(meshes["player"].position.y >= 2) {
+	if(meshes["player"].position.y >= player.maxHeight) {
 		if(player.jumpSpeed > 0) player.jumpSpeed *= -1;
-		meshes["player"].position.y = 2;
+		meshes["player"].position.y = player.maxHeight;
 	}
 	if(player.jumping) {
 		meshes["player"].position.y += player.jumpSpeed;
