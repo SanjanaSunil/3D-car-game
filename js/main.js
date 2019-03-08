@@ -11,7 +11,7 @@ var coins = [], coinGeometry, coinMaterial, coinTexture;
 
 var keyboard = {};
 var player = {
-				speed:0.1,
+				speed:0.15,
 				rightPosition:-1.8,
 				leftPosition:1.8,
 				jumpSpeed:0.2,
@@ -153,7 +153,7 @@ function init() {
 	coinTexture = textureLoader.load("assets/textures/coin.png");
 	coinGeometry = new THREE.CircleGeometry(7, 32);
 	coinMaterial = new THREE.MeshBasicMaterial({color:0xffffff, map:coinTexture});
-	for(var i=0; i<20; i++) {
+	for(var i=0; i<10; i++) {
 		var coin = new THREE.Mesh(coinGeometry, coinMaterial);
 
 		coin.rotation.x += Math.PI;
