@@ -360,7 +360,7 @@ function animate() {
 	/******************** CRATE ******************/
 
 	if(crate.position.z < camera.position.z - 5) {
-		crate.position.x = Math.random() < 0.5 ? (3) : (-3);
+		crate.position.x = (crate.position.x == 3) ? (-3) : (3);
 		crate.position.z += camera.position.z + 200;
 	}
 
