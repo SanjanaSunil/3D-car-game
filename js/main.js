@@ -39,6 +39,11 @@ var models = {
 		mtl:"assets/models/car.mtl",
 		mesh: null
 	},
+	police: {
+		obj:"assets/models/police.obj",
+		mtl:"assets/models/police.mtl",
+		mesh: null
+	},
 	gate: {
 		obj:"assets/models/gate.obj",
 		mtl:"assets/models/gate.mtl",
@@ -275,10 +280,16 @@ function init() {
 function createObjects() {
 	
 	meshes["player"] = models.car.mesh.clone();
-	meshes["player"].position.set(player.rightPosition, 0, -7.3);
+	meshes["player"].position.set(player.rightPosition, 0, -7);
 	meshes["player"].rotation.y += Math.PI;
 	meshes["player"].scale.set(2, 2, 1);
 	scene.add(meshes["player"]);
+
+	meshes["police"] = models.police.mesh.clone();
+	meshes["police"].position.set(player.rightPosition, 0, -8);
+	meshes["police"].scale.set(2, 2, 1);
+	meshes["police"].rotation.y += Math.PI;
+	scene.add(meshes["police"]);
 
 	for(var i=0; i<5; ++i) {
 		var gateNo = "gate" + i.toString();
@@ -342,6 +353,8 @@ function animate() {
 	camera.lookAt.z += player.speed;
 	light.position.z += player.speed;
 	meshes["player"].position.z += player.speed;
+	meshes["police"].position.z += player.speed / 1.05;
+	meshes["police"].position.x = meshes["player"].position.x;
 
 	/******** Rerendering to create infinite illusion ********/
 
