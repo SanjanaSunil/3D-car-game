@@ -111,7 +111,7 @@ function init() {
 	camera.lookAt(new THREE.Vector3(0, 1.8, 0));
 
 	renderer = new THREE.WebGLRenderer();
-	renderer.setSize(window.innerWidth/3, window.innerHeight/1.5);
+	renderer.setSize(window.innerWidth/2, window.innerHeight/1.2);
 	renderer.setClearColor(0x00bfff, 1);
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.BasicShadowMap;
