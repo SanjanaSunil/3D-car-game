@@ -15,7 +15,7 @@ var gameOver = false;
 
 var keyboard = {};
 var player = {
-				speed:0.15,
+				speed:0.18,
 				rightPosition:-1.8,
 				leftPosition:1.8,
 				jumpSpeed:0.2,
@@ -387,7 +387,7 @@ function animate() {
 
 		if(meshes[gateNo].position.z < camera.position.z - 5) {
 			meshes[gateNo].position.x = (meshes[gateNo].position.x==4.8) ? -0.6 : 4.8;
-			meshes[gateNo].position.z += parseFloat((Math.random() * (camera.position.z + 40 - camera.position.z - 20) + camera.position.z + 20));
+			meshes[gateNo].position.z += parseFloat((Math.random() * (camera.position.z + 100 - camera.position.z - 7) + camera.position.z + 7));
 		}
 	}
 
@@ -397,6 +397,7 @@ function animate() {
 		crate.position.x = (crate.position.x == 3) ? (-3) : (3);
 		crate.position.z += camera.position.z + 200;
 	}
+
 
 	scoreText.innerHTML = "Score: " + player.score;
 
@@ -409,6 +410,11 @@ function animate() {
 
 	if(camera.position.z > 1000) endGame("You won!");
 	if(detectCollision(meshes["player"], crate)) endGame("You lost!");
+
+	for(var i=0; i<5; i++) {
+		var gateNo = "gate" + i.toString();
+		if(detectCollision(meshes[gateNo], meshes["player"])) endGame("You lost!");
+	}
 
 	renderer.render(scene, camera);
 	stats.end();
@@ -440,9 +446,15 @@ function endGame(message) {
 	for(var i=0; i<rightWall.length; i++) scene.remove(rightWall[i]);
 	for(var i=0; i<track.length; i++) scene.remove(track[i]);
 	for(var i=0; i<roof.length; i++) scene.remove(roof[i]);
+	
 	scene.remove(meshes["player"]);
 	for(var i=0; i<coins.length; i++) scene.remove(coins[i]);
 	scene.remove(crate);
+
+	for(var i=0; i<5; i++) {
+		var gateNo = "gate" + i.toString();
+		scene.remove(meshes[gateNo]);
+	}
 
 	gameOver = true;
 	gameOverText.innerHTML = "GAME OVER. " + message;
