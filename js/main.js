@@ -265,6 +265,8 @@ function onResourcesLoaded() {
 
 function animate() {
 	
+	if(gameOver) return;
+	
 	if( RESOURCES_LOADED == false) {
 		requestAnimationFrame(animate);
 		renderer.render(loadingScreen.scene, loadingScreen.camera);
