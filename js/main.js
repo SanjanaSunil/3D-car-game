@@ -9,6 +9,8 @@ var roof = [], roofTexture, roofGeometry, roofLen, roofFlag = false;
 
 var coins = [], coinGeometry, coinMaterial, coinTexture;
 
+var flyBoost, flyBoostGeometry, flyBoostMaterial, flyBoostTexture, flyBoostActivated = 0;
+
 var crate, crateGeometry, crateMaterial, crateTexture, crateNormalMap, crateBumpMap;
 
 var gameOver = false;
@@ -29,7 +31,7 @@ var loadingScreen = {
 	camera: new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 100),
 };
 var loadingManager = null;
-var RESOURCES_LOADED = false;
+var loaded = false;
 
 var models = {
 	car: {
@@ -77,9 +79,8 @@ function init() {
 		console.log(item, loaded, total);
 	};
 	loadingManager.onLoad = function(){
-		console.log("Loaded all resources");
-		RESOURCES_LOADED = true;
-		onResourcesLoaded();
+		loaded = true;
+		createObjects();
 		document.getElementById("loading-text").remove();
 	};
 
@@ -184,7 +185,7 @@ function init() {
 
 	/*********** CRATE  ***********/
 
-	crateGeometry = new THREE.BoxGeometry(5, 10, 5);
+	crateGeometry = new THREE.BoxGeometry(5, 6.5, 5);
 	crateTexture = textureLoader.load("assets/textures/crate0_diffuse.png");
 	crateBumpMap = textureLoader.load("assets/textures/crate0_bump.png"); 
 	crateNormalMap = textureLoader.load("assets/textures/crate0_normal.png");
@@ -200,6 +201,18 @@ function init() {
 	crate.castShadow = true;
 	crate.position.set(3, -0.5, 20);
 	scene.add(crate);
+
+	/*********** FLY BOOST **********/
+
+	flyBoostGeometry = new THREE.CircleGeometry(10, 32);
+	flyBoostTexture = textureLoader.load("assets/textures/jump.png");
+	flyBoostMaterial = new THREE.MeshBasicMaterial({color:0xffffff, map:flyBoostTexture});
+	flyBoost = new THREE.Mesh(flyBoostGeometry, flyBoostMaterial);
+	flyBoost.position.set(-2, -0.2, 20);
+	flyBoost.rotation.x += Math.PI;
+	flyBoost.rotation.z += Math.PI;
+	flyBoost.scale.set(0.05, 0.05, 0.05);
+	scene.add(flyBoost);
 
 	/*********** MODELS ***********/
 
@@ -259,7 +272,7 @@ function init() {
 }
 
 
-function onResourcesLoaded() {
+function createObjects() {
 	
 	meshes["player"] = models.car.mesh.clone();
 	meshes["player"].position.set(player.rightPosition, 0, -7.3);
@@ -273,7 +286,7 @@ function onResourcesLoaded() {
 
 		meshes[gateNo].position.set(-0.6, -1, 0);
 		if(Math.random() < 0.5) meshes[gateNo].position.x = 4.8;
-		meshes[gateNo].position.z = parseFloat((Math.random() * (100.00 - 0.00) + 0.00))
+		meshes[gateNo].position.z = parseFloat((Math.random() * (200.00 - 0.00) + 0.00))
 		meshes[gateNo].scale.set(4, 2, 2);
 		scene.add(meshes[gateNo]);
 	}
@@ -284,7 +297,7 @@ function animate() {
 	
 	if(gameOver) return;
 
-	if( RESOURCES_LOADED == false) {
+	if(loaded == false) {
 		requestAnimationFrame(animate);
 		renderer.render(loadingScreen.scene, loadingScreen.camera);
 		return;
@@ -398,6 +411,30 @@ function animate() {
 		crate.position.z += camera.position.z + 200;
 	}
 
+	/*************** FLY POWERUP *************/
+
+	if(detectCollision(meshes["player"], flyBoost)) {
+		flyBoostActivated = 1;
+		flyBoost.position.z = camera.position.z + 200;
+	}
+	if(flyBoost.position.z < camera.position.z - 2) flyBoost.position.z = camera.position.z + 100;
+
+	if(flyBoostActivated) {
+		meshes["player"].position.y = 3;
+		flyBoostActivated += 1;
+	}
+	if(flyBoostActivated > 250) {
+		var color = new THREE.Color(0xff0000);
+		if(wallMaterial.color.equals(color)) color.set(0xffffff);
+		wallMaterial.color.set(color);
+		trackMaterial.color.set(color);
+	}
+	if(flyBoostActivated > 300) {
+		flyBoostActivated = 0;
+		wallMaterial.color.set(0xffffff);
+		trackMaterial.color.set(0xffffff);
+		meshes["player"].position.y -= 3;
+	}
 
 	scoreText.innerHTML = "Score: " + player.score;
 
@@ -448,6 +485,7 @@ function endGame(message) {
 	for(var i=0; i<roof.length; i++) scene.remove(roof[i]);
 	
 	scene.remove(meshes["player"]);
+	scene.remove(flyBoost);
 	for(var i=0; i<coins.length; i++) scene.remove(coins[i]);
 	scene.remove(crate);
 
