@@ -6,7 +6,13 @@ var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wall
 var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = false;
 
 var keyboard = {};
-var player = {speed:0.08, rightPosition:-1.8, leftPosition:1.8};
+var player = {
+				speed:0.08,
+				rightPosition:-1.8,
+				leftPosition:1.8,
+				jumpSpeed:0.1,
+				jumping: false
+			};
 
 var loadingScreen = {
 	scene: new THREE.Scene(),
@@ -219,11 +225,21 @@ function animate() {
 
 	stats.begin();
 
-	if(keyboard[39] || keyboard[68]) {
-		meshes["player"].position.x = player.rightPosition;
+	if(keyboard[39] || keyboard[68]) meshes["player"].position.x = player.rightPosition;
+	if(keyboard[37] || keyboard[65]) meshes["player"].position.x = player.leftPosition;
+	if(keyboard[32] && !player.jumping) player.jumping = true;
+
+	if(meshes["player"].position.y >= 2) {
+		if(player.jumpSpeed > 0) player.jumpSpeed *= -1;
+		meshes["player"].position.y = 2;
 	}
-	if(keyboard[37] || keyboard[65]) {
-		meshes["player"].position.x = player.leftPosition;
+	if(player.jumping) {
+		meshes["player"].position.y += player.jumpSpeed;
+	}
+	if(meshes["player"].position.y<=0 && player.jumping) {
+		meshes["player"].position.y = 0;
+		if(player.jumpSpeed < 0) player.jumpSpeed *= -1;
+		player.jumping = false;
 	}
 
 	camera.position.z += player.speed;
