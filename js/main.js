@@ -27,7 +27,7 @@ function init() {
 			trackMaterial
 		);
 		trackObj.rotation.x -= Math.PI / 2;
-		trackObj.position.y -= 0.1;
+		trackObj.position.y -= 1.5;
 		trackObj.position.z += startZ;
 		startZ += trackLen; 
 		track.push(trackObj);
@@ -39,7 +39,7 @@ function init() {
 	
 	wallTexture = textureLoader.load("assets/textures/wall.png");
 	wallLen = 51;
-	wallGeometry = new THREE.PlaneGeometry(9, wallLen, 10, 10);
+	wallGeometry = new THREE.PlaneGeometry(23, wallLen, 10, 10);
 	wallMaterial = new THREE.MeshPhongMaterial({color:0xffffff, map:wallTexture});
 	startZ = 0;
 	for(var i=0; i<4; ++i) {
@@ -50,7 +50,7 @@ function init() {
 		rightWallObj.rotation.x -= Math.PI / 2;
 		rightWallObj.rotation.y += Math.PI / 2;
 		rightWallObj.position.x -= 8;
-		rightWallObj.position.y += 4;
+		// rightWallObj.position.y += 4;
 		rightWallObj.position.z += startZ;
 		startZ += wallLen;
 		rightWall.push(rightWallObj);
@@ -67,7 +67,7 @@ function init() {
 		leftWallObj.rotation.x -= Math.PI / 2;
 		leftWallObj.rotation.y -= Math.PI / 2;
 		leftWallObj.position.x += 8;
-		leftWallObj.position.y += 4;
+		// leftWallObj.position.y += 4;
 		leftWallObj.position.z += startZ;
 		startZ += wallLen;
 		leftWall.push(leftWallObj);
@@ -87,7 +87,7 @@ function init() {
 			wallMaterial
 		);
 		roofObj.rotation.x += Math.PI / 2;
-		roofObj.position.y += 6;
+		roofObj.position.y += 10.2;
 		roofObj.position.z += startZ;
 		startZ += roofLen;
 		// roof.receiveShadow = true;
@@ -112,7 +112,7 @@ function init() {
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize(window.innerWidth/2, window.innerHeight/1.2);
-	renderer.setClearColor(0x00bfff, 1);
+	renderer.setClearColor(0x000000, 1);
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.BasicShadowMap;
 
