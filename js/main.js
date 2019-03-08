@@ -1,6 +1,8 @@
 var scene, camera, renderer, stats;
 var ambientLight, light;
 
+var scoreText;
+
 var track = [], trackGeometry, trackMaterial, trackTexture, trackLen, trackFlag = false;
 var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wallLen, wallFlag = false;
 var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = false;
@@ -40,6 +42,12 @@ function init() {
 	camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 100);
 	var textureLoader = new THREE.TextureLoader();
 	var startZ = 0;
+
+	scoreText = document.createElement('div');
+	scoreText.setAttribute('id', 'score-text');
+	scoreText.innerHTML = "";
+	scoreText.style.top = window.innerHeight / 14 + "px";
+	document.body.appendChild(scoreText);
 
 	var loadingText = document.createElement('div');
 	loadingText.setAttribute('id', 'loading-text');
@@ -310,15 +318,28 @@ function animate() {
 	/******************* COINS ******************/
 
 	for(var i=0; i<coins.length; i++) {
-		if(coins[i].position.z < camera.position.z + 1) {
+
+		if(detectCollision(meshes["player"], coins[i]) || coins[i].position.z < camera.position.z + 1) {
+
+			if(detectCollision(meshes["player"], coins[i])) player.score += 1;
+
 			coins[i].position.x = Math.random() < 0.5 ? (player.rightPosition-0.3) : (player.leftPosition + 0.3);
 			coins[i].position.z = parseFloat((Math.random() * (camera.position.z + 200 - camera.position.z + 50) + camera.position.z + 50));
 		}
 	}
 
+	scoreText.innerHTML = "Score: " + player.score;
 
 	renderer.render(scene, camera);
 	stats.end();
+}
+
+
+function detectCollision(obj1, obj2) {
+	var bbox1 = new THREE.Box3().setFromObject(obj1);
+	var bbox2 = new THREE.Box3().setFromObject(obj2);
+	
+	return bbox1.isIntersectionBox(bbox2);
 }
 
 function keyDown(event) {
