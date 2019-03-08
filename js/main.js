@@ -1,13 +1,17 @@
 var scene, camera, renderer, stats;
 var ambientLight, light;
 
-var scoreText;
+var scoreText, gameOverText;
 
 var track = [], trackGeometry, trackMaterial, trackTexture, trackLen, trackFlag = false;
 var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wallLen, wallFlag = false;
 var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = false;
 
 var coins = [], coinGeometry, coinMaterial, coinTexture;
+
+var crate, crateGeometry, crateMaterial, crateTexture, crateNormalMap, crateBumpMap;
+
+var gameOver = false;
 
 var keyboard = {};
 var player = {
@@ -48,6 +52,12 @@ function init() {
 	scoreText.innerHTML = "";
 	scoreText.style.top = window.innerHeight / 14 + "px";
 	document.body.appendChild(scoreText);
+
+	gameOverText = document.createElement('div');
+	gameOverText.setAttribute('id', 'game-over-text');
+	gameOverText.innerHTML = "";
+	gameOverText.style.top = window.innerHeight / 2.4 + "px";
+	document.body.appendChild(gameOverText);
 
 	var loadingText = document.createElement('div');
 	loadingText.setAttribute('id', 'loading-text');
@@ -165,6 +175,25 @@ function init() {
 		coins.push(coin);
 		scene.add(coin);
 	}
+
+	/*********** CRATE  ***********/
+
+	crateGeometry = new THREE.BoxGeometry(5, 10, 5);
+	crateTexture = textureLoader.load("assets/textures/crate0_diffuse.png");
+	crateBumpMap = textureLoader.load("assets/textures/crate0_bump.png"); 
+	crateNormalMap = textureLoader.load("assets/textures/crate0_normal.png");
+	crateMaterial = new THREE.MeshPhongMaterial({
+						color:0xffffff,
+						map:crateTexture,
+						bumpMap:crateBumpMap,
+						normalMap:crateNormalMap,
+					});
+	
+	crate = new THREE.Mesh(crateGeometry, crateMaterial);
+	crate.receiveShadow = true;
+	crate.castShadow = true;
+	crate.position.set(3, -0.5, 20);
+	scene.add(crate);
 
 	/*********** MODELS ***********/
 
@@ -328,6 +357,15 @@ function animate() {
 		}
 	}
 
+	/******************** CRATE ******************/
+
+	if(crate.position.z < camera.position.z - 5) {
+		crate.position.x = Math.random() < 0.5 ? (3) : (-3);
+		crate.position.z += camera.position.z + 200;
+	}
+
+	if(detectCollision(meshes["player"], crate)) endGame();
+
 	scoreText.innerHTML = "Score: " + player.score;
 
 	renderer.render(scene, camera);
@@ -341,6 +379,20 @@ function detectCollision(obj1, obj2) {
 	
 	return bbox1.isIntersectionBox(bbox2);
 }
+
+function endGame() {
+	for(var i=0; i<leftWall.length; i++) scene.remove(leftWall[i]);
+	for(var i=0; i<rightWall.length; i++) scene.remove(rightWall[i]);
+	for(var i=0; i<track.length; i++) scene.remove(track[i]);
+	for(var i=0; i<roof.length; i++) scene.remove(roof[i]);
+	scene.remove(meshes["player"]);
+	for(var i=0; i<coins.length; i++) scene.remove(coins[i]);
+	scene.remove(crate);
+
+	gameOver = true;
+	gameOverText.innerHTML = "GAME OVER";
+}
+
 
 function keyDown(event) {
 	keyboard[event.keyCode] = true;
