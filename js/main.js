@@ -5,7 +5,7 @@ var scoreText, gameOverText;
 
 var track = [], trackGeometry, trackMaterial, trackTexture, trackLen, trackFlag = false;
 var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wallLen, wallFlag = false;
-var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = false;
+var roof = [], roofTexture, roofGeometry, roofLen, roofFlag = false;
 
 var coins = [], coinGeometry, coinMaterial, coinTexture;
 
@@ -105,7 +105,7 @@ function init() {
 	wallTexture = textureLoader.load("assets/textures/wall.png");
 	wallLen = 51;
 	wallGeometry = new THREE.PlaneGeometry(23, wallLen, 10, 10);
-	wallMaterial = new THREE.MeshPhongMaterial({color:0xffffff, map:wallTexture});
+	wallMaterial = new THREE.MeshPhongMaterial({color:0xffffff, map:wallTexture, transparent:true});
 	startZ = 0;
 	for(var i=0; i<4; ++i) {
 		var rightWallObj = new THREE.Mesh(
@@ -144,7 +144,6 @@ function init() {
 
 	roofLen = 50;
 	roofGeometry = new THREE.PlaneGeometry(14, roofLen, 10, 10);
-	roofMaterial = new THREE.MeshPhongMaterial({color:0xffffff, map:roofTexture});
 	startZ = 0;
 	for(var i=0; i<4; ++i) {
 		var roofObj = new THREE.Mesh(
@@ -290,6 +289,9 @@ function animate() {
 
 	var time = Date.now() * 0.0005;
 
+	// if(keyboard[67]) colorToGray();
+	// else grayToColor();
+
 	if(keyboard[39] || keyboard[68]) meshes["player"].position.x = player.rightPosition;
 	if(keyboard[37] || keyboard[65]) meshes["player"].position.x = player.leftPosition;
 	if(keyboard[32] && !player.jumping) player.jumping = true;
@@ -310,7 +312,6 @@ function animate() {
 	camera.position.z += player.speed;
 	camera.lookAt.z += player.speed;
 	light.position.z += player.speed;
-	// light.position.x = meshes["player"].position.x;
 	meshes["player"].position.z += player.speed;
 
 	/******** Rerendering to create infinite illusion ********/
@@ -372,9 +373,9 @@ function animate() {
 
 	scoreText.innerHTML = "Score: " + player.score;
 
-	// Change light intensity
-	if(Math.floor(time)%15==0) light.intensity = (light.intensity==1) ? 3:1;
-	else light.intensity = 1;
+	// Flashing walls
+	if(Math.floor(time)%15==0) wallMaterial.opacity = (wallMaterial.opacity==1) ? 0.5:1;
+	else wallMaterial.opacity = 1;
 
 
 	/****************** GAME END ***************/
@@ -386,6 +387,19 @@ function animate() {
 	stats.end();
 }
 
+// function colorToGray() {
+// 	wallMaterial.color.set(0x181818);
+// 	trackMaterial.color.set(0x181818);
+// 	coinMaterial.color.set(0x181818);
+// 	crateMaterial.color.set(0x181818);
+// }
+
+// function grayToColor() {
+// 	wallMaterial.color.set(0xffffff);
+// 	trackMaterial.color.set(0xffffff);
+// 	coinMaterial.color.set(0xffffff);
+// 	crateMaterial.color.set(0xffffff);
+// }
 
 function detectCollision(obj1, obj2) {
 	var bbox1 = new THREE.Box3().setFromObject(obj1);
