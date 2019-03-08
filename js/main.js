@@ -14,7 +14,8 @@ var player = {
 				leftPosition:1.8,
 				jumpSpeed:0.2,
 				maxHeight:2.5,
-				jumping: false
+				jumping: false,
+				score: 0
 			};
 
 var loadingScreen = {
