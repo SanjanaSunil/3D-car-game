@@ -36,6 +36,11 @@ var models = {
 		obj:"assets/models/car.obj",
 		mtl:"assets/models/car.mtl",
 		mesh: null
+	},
+	gate: {
+		obj:"assets/models/gate.obj",
+		mtl:"assets/models/gate.mtl",
+		mesh: null
 	}
 };
 var meshes = {};
@@ -261,6 +266,17 @@ function onResourcesLoaded() {
 	meshes["player"].rotation.y += Math.PI;
 	meshes["player"].scale.set(2, 2, 1);
 	scene.add(meshes["player"]);
+
+	for(var i=0; i<5; ++i) {
+		var gateNo = "gate" + i.toString();
+		meshes[gateNo] = models.gate.mesh.clone();
+
+		meshes[gateNo].position.set(-0.6, -1, 0);
+		if(Math.random() < 0.5) meshes[gateNo].position.x = 4.8;
+		meshes[gateNo].position.z = parseFloat((Math.random() * (100.00 - 0.00) + 0.00))
+		meshes[gateNo].scale.set(4, 2, 2);
+		scene.add(meshes[gateNo]);
+	}
 }
 
 
@@ -360,7 +376,18 @@ function animate() {
 			if(detectCollision(meshes["player"], coins[i])) player.score += 1;
 
 			coins[i].position.x = Math.random() < 0.5 ? (player.rightPosition-0.3) : (player.leftPosition + 0.3);
-			coins[i].position.z = parseFloat((Math.random() * (camera.position.z + 200 - camera.position.z + 50) + camera.position.z + 50));
+			coins[i].position.z = parseFloat((Math.random() * (camera.position.z + 200 - camera.position.z - 50) + camera.position.z + 50));
+		}
+	}
+
+	/******************** GATE *******************/
+	
+	for(var i=0; i<5; ++i) {
+		var gateNo = "gate" + i.toString();
+
+		if(meshes[gateNo].position.z < camera.position.z - 5) {
+			meshes[gateNo].position.x = (meshes[gateNo].position.x==4.8) ? -0.6 : 4.8;
+			meshes[gateNo].position.z += parseFloat((Math.random() * (camera.position.z + 40 - camera.position.z - 20) + camera.position.z + 20));
 		}
 	}
 
