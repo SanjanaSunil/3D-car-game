@@ -191,7 +191,7 @@ function init() {
 function onResourcesLoaded() {
 	
 	meshes["player"] = models.car.mesh.clone();
-	meshes["player"].position.set(player.rightPosition, 0, -7);
+	meshes["player"].position.set(player.rightPosition, 0, -7.3);
 	meshes["player"].rotation.y += Math.PI;
 	meshes["player"].scale.set(2, 2, 1);
 	scene.add(meshes["player"]);
