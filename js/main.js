@@ -5,6 +5,8 @@ var track = [], trackGeometry, trackMaterial, trackTexture, trackLen, trackFlag 
 var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wallLen, wallFlag = false;
 var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = false;
 
+var coins = [], coinGeometry, coinMaterial, coinTexture;
+
 var keyboard = {};
 var player = {
 				speed:0.1,
@@ -137,6 +139,24 @@ function init() {
 		scene.add(roofObj);
 	}
 
+	/*********** COINS ***********/
+
+	coinTexture = textureLoader.load("assets/textures/coin.png");
+	coinGeometry = new THREE.CircleGeometry(7, 32);
+	coinMaterial = new THREE.MeshBasicMaterial({color:0xffffff, map:coinTexture});
+	for(var i=0; i<20; i++) {
+		var coin = new THREE.Mesh(coinGeometry, coinMaterial);
+
+		coin.rotation.x += Math.PI;
+		coin.rotation.z -= Math.PI;
+		coin.scale.set(0.04, 0.04, 0.04);
+		coin.position.x = Math.random() < 0.5 ? (player.rightPosition-0.3) : (player.leftPosition + 0.3);
+		coin.position.z = parseFloat((Math.random() * (200.00 - 0.00) + 0.00));
+
+		coins.push(coin);
+		scene.add(coin);
+	}
+
 	/*********** MODELS ***********/
 
 	for(var _key in models) {
@@ -170,8 +190,8 @@ function init() {
 	ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
 	scene.add(ambientLight);
 
-	light = new THREE.PointLight(0xffffff, 0.8, 18);
-	light.position.set(-3, 6, -3);
+	light = new THREE.PointLight(0xffffff, 1, 18);
+	light.position.set(0, 6, -6);
 	light.castShadow = true;
 	light.shadow.camera.near = 0.1;
 	light.shadow.camera.far = 25;
@@ -246,6 +266,7 @@ function animate() {
 	camera.position.z += player.speed;
 	camera.lookAt.z += player.speed;
 	light.position.z += player.speed;
+	// light.position.x = meshes["player"].position.x;
 	meshes["player"].position.z += player.speed;
 
 	/******** Rerendering to create infinite illusion ********/
@@ -283,7 +304,17 @@ function animate() {
 		roofFlag = true;
 	}
 	if(Math.floor(camera.position.z)%roofLen == 1) roofFlag = false;
-	/********************************************************/
+
+
+	/******************* COINS ******************/
+
+	for(var i=0; i<coins.length; i++) {
+		if(coins[i].position.z < camera.position.z + 1) {
+			coins[i].position.x = Math.random() < 0.5 ? (player.rightPosition-0.3) : (player.leftPosition + 0.3);
+			coins[i].position.z = parseFloat((Math.random() * (camera.position.z + 200 - camera.position.z + 50) + camera.position.z + 50));
+		}
+	}
+
 
 	renderer.render(scene, camera);
 	stats.end();
