@@ -266,7 +266,7 @@ function onResourcesLoaded() {
 function animate() {
 	
 	if(gameOver) return;
-	
+
 	if( RESOURCES_LOADED == false) {
 		requestAnimationFrame(animate);
 		renderer.render(loadingScreen.scene, loadingScreen.camera);
@@ -366,9 +366,10 @@ function animate() {
 		crate.position.z += camera.position.z + 200;
 	}
 
-	if(detectCollision(meshes["player"], crate)) endGame();
-
 	scoreText.innerHTML = "Score: " + player.score;
+
+	if(camera.position.z > 1000) endGame("You won!");
+	if(detectCollision(meshes["player"], crate)) endGame("You lost!");
 
 	renderer.render(scene, camera);
 	stats.end();
@@ -382,7 +383,7 @@ function detectCollision(obj1, obj2) {
 	return bbox1.isIntersectionBox(bbox2);
 }
 
-function endGame() {
+function endGame(message) {
 	for(var i=0; i<leftWall.length; i++) scene.remove(leftWall[i]);
 	for(var i=0; i<rightWall.length; i++) scene.remove(rightWall[i]);
 	for(var i=0; i<track.length; i++) scene.remove(track[i]);
@@ -392,7 +393,7 @@ function endGame() {
 	scene.remove(crate);
 
 	gameOver = true;
-	gameOverText.innerHTML = "GAME OVER";
+	gameOverText.innerHTML = "GAME OVER. " + message;
 }
 
 
