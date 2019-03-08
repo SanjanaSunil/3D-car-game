@@ -1,12 +1,12 @@
 var scene, camera, renderer, stats;
 var ambientLight, light;
 
-var track = [], trackGeometry, trackMaterial, trackTexture;
-var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial;
-var roof = [], roofTexture, roofGeometry, roofMaterial;
+var track = [], trackGeometry, trackMaterial, trackTexture, trackLen, trackFlag = false;
+var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wallLen, wallFlag = false;
+var roof = [], roofTexture, roofGeometry, roofMaterial, roofLen, roofFlag = false;
 
 var keyboard = {};
-var player = {speed:0.02};
+var player = {speed:0.08};
 
 function init() {
 	scene = new THREE.Scene();
@@ -17,17 +17,19 @@ function init() {
 	/*********** ROAD ***********/
 
 	trackTexture = textureLoader.load("assets/textures/track.jpg");
-	trackGeometry = new THREE.PlaneGeometry(8, 20, 10, 10);
+	trackLen = 50;
+	trackGeometry = new THREE.PlaneGeometry(14, trackLen, 10, 10);
 	trackMaterial = new THREE.MeshPhongMaterial({color:0xffffff, map:trackTexture});
 	startZ = 0;
-	for(var i=0; i<3; ++i) {
+	for(var i=0; i<4; ++i) {
 		var trackObj = new THREE.Mesh(
 			trackGeometry,
 			trackMaterial
 		);
 		trackObj.rotation.x -= Math.PI / 2;
+		trackObj.position.y -= 0.1;
 		trackObj.position.z += startZ;
-		startZ += 20; 
+		startZ += trackLen; 
 		track.push(trackObj);
 		// track.receiveShadow = true;
 		scene.add(trackObj);
@@ -36,10 +38,11 @@ function init() {
 	/*********** WALL ***********/
 	
 	wallTexture = textureLoader.load("assets/textures/wall.png");
-	wallGeometry = new THREE.PlaneGeometry(12, 50, 10, 10);
+	wallLen = 51;
+	wallGeometry = new THREE.PlaneGeometry(9, wallLen, 10, 10);
 	wallMaterial = new THREE.MeshPhongMaterial({color:0xffffff, map:wallTexture});
 	startZ = 0;
-	for(var i=0; i<3; ++i) {
+	for(var i=0; i<4; ++i) {
 		var rightWallObj = new THREE.Mesh(
 			wallGeometry,
 			wallMaterial
@@ -49,14 +52,14 @@ function init() {
 		rightWallObj.position.x -= 8;
 		rightWallObj.position.y += 4;
 		rightWallObj.position.z += startZ;
-		startZ += 50;
+		startZ += wallLen;
 		rightWall.push(rightWallObj);
 		// rightWall.receiveShadow = true;
 		scene.add(rightWallObj);
 	}
 
 	startZ = 0;
-	for(var i=0; i<3; ++i) {
+	for(var i=0; i<4; ++i) {
 		var leftWallObj = new THREE.Mesh(
 			wallGeometry,
 			wallMaterial
@@ -66,7 +69,7 @@ function init() {
 		leftWallObj.position.x += 8;
 		leftWallObj.position.y += 4;
 		leftWallObj.position.z += startZ;
-		startZ += 50;
+		startZ += wallLen;
 		leftWall.push(leftWallObj);
 		// leftWall.receiveShadow = true;
 		scene.add(leftWallObj);
@@ -74,18 +77,19 @@ function init() {
 
 	/*********** Roof ***********/
 
-	roofGeometry = new THREE.PlaneGeometry(8, 30, 10, 10);
+	roofLen = 50;
+	roofGeometry = new THREE.PlaneGeometry(14, roofLen, 10, 10);
 	roofMaterial = new THREE.MeshPhongMaterial({color:0xffffff, map:roofTexture});
 	startZ = 0;
-	for(var i=0; i<2; ++i) {
+	for(var i=0; i<4; ++i) {
 		var roofObj = new THREE.Mesh(
 			roofGeometry,
 			wallMaterial
 		);
 		roofObj.rotation.x += Math.PI / 2;
-		roofObj.position.y += 5.9;
+		roofObj.position.y += 6;
 		roofObj.position.z += startZ;
-		startZ += 30;
+		startZ += roofLen;
 		// roof.receiveShadow = true;
 		roof.push(roofObj);
 		scene.add(roofObj);
@@ -133,9 +137,49 @@ function animate() {
 	// 	trackMaterial.color.set(0xffffff);
 	// }
 
-	// camera.position.z += player.speed;
-	// light.position.z += player.speed;
 	stats.begin();
+
+	camera.position.z += player.speed;
+	camera.lookAt.z += player.speed;
+	light.position.z += player.speed;
+
+	/******** Rerendering to create infinite illusion ********/
+
+	if(Math.floor(camera.position.z)%wallLen==0 && !wallFlag && Math.floor(camera.position.z)>0) {
+
+		leftWall[0].position.z += (wallLen * leftWall.length);
+		var beginningLeftWall = leftWall.shift();
+		leftWall.push(beginningLeftWall);
+
+		rightWall[0].position.z += (wallLen * rightWall.length);
+		var beginningRightWall = rightWall.shift();
+		rightWall.push(beginningRightWall);
+
+		wallFlag = true;
+	}
+	if(Math.floor(camera.position.z)%wallLen == 1) wallFlag = false;
+
+	if(Math.floor(camera.position.z)%trackLen==0 && !trackFlag && Math.floor(camera.position.z)>0) {
+
+		track[0].position.z += (trackLen * track.length);
+		var beginningTrack = track.shift();
+		track.push(beginningTrack);
+
+		trackFlag = true;
+	}
+	if(Math.floor(camera.position.z)%trackLen == 1) trackFlag = false;
+
+	if(Math.floor(camera.position.z)%roofLen==0 && !roofFlag && Math.floor(camera.position.z)>0) {
+
+		roof[0].position.z += (roofLen * roof.length);
+		var beginningRoof = roof.shift();
+		roof.push(beginningRoof);
+
+		roofFlag = true;
+	}
+	if(Math.floor(camera.position.z)%roofLen == 1) roofFlag = false;
+	/********************************************************/
+
 	renderer.render(scene, camera);
 	stats.end();
 }
