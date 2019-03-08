@@ -1,4 +1,4 @@
-var scene, camera, renderer, stats;
+var scene, camera, renderer, stats, clock;
 var ambientLight, light;
 
 var scoreText, gameOverText;
@@ -44,6 +44,8 @@ function init() {
 
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 100);
+	clock = new THREE.Clock();
+
 	var textureLoader = new THREE.TextureLoader();
 	var startZ = 0;
 
@@ -286,6 +288,8 @@ function animate() {
 
 	stats.begin();
 
+	var time = Date.now() * 0.0005;
+
 	if(keyboard[39] || keyboard[68]) meshes["player"].position.x = player.rightPosition;
 	if(keyboard[37] || keyboard[65]) meshes["player"].position.x = player.leftPosition;
 	if(keyboard[32] && !player.jumping) player.jumping = true;
@@ -367,6 +371,13 @@ function animate() {
 	}
 
 	scoreText.innerHTML = "Score: " + player.score;
+
+	// Change light intensity
+	if(Math.floor(time)%15==0) light.intensity = (light.intensity==1) ? 3:1;
+	else light.intensity = 1;
+
+
+	/****************** GAME END ***************/
 
 	if(camera.position.z > 1000) endGame("You won!");
 	if(detectCollision(meshes["player"], crate)) endGame("You lost!");
