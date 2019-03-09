@@ -17,7 +17,7 @@ var gameOver = false;
 
 var keyboard = {};
 var player = {
-				speed:0.18,
+				speed:0.2,
 				rightPosition:-1.8,
 				leftPosition:1.8,
 				jumpSpeed:0.2,
@@ -47,6 +47,11 @@ var models = {
 	gate: {
 		obj:"assets/models/gate.obj",
 		mtl:"assets/models/gate.mtl",
+		mesh: null
+	},
+	fence: {
+		obj:"assets/models/fence.obj",
+		mtl:"assets/models/fence.mtl",
 		mesh: null
 	}
 };
@@ -291,7 +296,7 @@ function createObjects() {
 	meshes["police"].rotation.y += Math.PI;
 	scene.add(meshes["police"]);
 
-	for(var i=0; i<5; ++i) {
+	for(var i=0; i<5; ++i) {	
 		var gateNo = "gate" + i.toString();
 		meshes[gateNo] = models.gate.mesh.clone();
 
@@ -301,6 +306,12 @@ function createObjects() {
 		meshes[gateNo].scale.set(4, 2, 2);
 		scene.add(meshes[gateNo]);
 	}
+
+	meshes["fence"] = models.fence.mesh.clone();
+	meshes["fence"].rotation.y += Math.PI / 2;
+	meshes["fence"].position.set(0, -0.8, 35);
+	meshes["fence"].scale.set(3, 8, 5);
+	scene.add(meshes["fence"]);
 }
 
 
@@ -417,6 +428,13 @@ function animate() {
 		}
 	}
 
+	/******************** FENCE ******************/
+
+	if(meshes["fence"].position.z < camera.position.z - 2) {
+		meshes["fence"].position.x = (meshes["fence"].position.x == 0) ? 5 : 0;
+		meshes["fence"].position.z = camera.position.z + 70;
+	}
+	
 	/******************** CRATE ******************/
 
 	if(crate.position.z < camera.position.z - 5) {
@@ -498,6 +516,7 @@ function endGame(message) {
 	for(var i=0; i<roof.length; i++) scene.remove(roof[i]);
 	
 	scene.remove(meshes["player"]);
+	scene.remove(meshes["fence"]);
 	scene.remove(flyBoost);
 	for(var i=0; i<coins.length; i++) scene.remove(coins[i]);
 	scene.remove(crate);
