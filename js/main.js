@@ -28,7 +28,7 @@ var player = {
 
 var loadingScreen = {
 	scene: new THREE.Scene(),
-	camera: new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 100),
+	camera: new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100),
 };
 var loadingManager = null;
 var loaded = false;
@@ -506,7 +506,7 @@ function animate() {
 
 	/****************** GAME END ***************/
 
-	if(camera.position.z > 1000) endGame("You won!");
+	if(camera.position.z > 2000) endGame("You won!");
 	if(detectCollision(meshes["player"], crate)) endGame("You lost!");
 
 	for(var i=0; i<5; i++) {
