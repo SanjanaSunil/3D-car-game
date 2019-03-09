@@ -9,6 +9,8 @@ var roof = [], roofTexture, roofGeometry, roofLen, roofFlag = false;
 
 var coins = [], coinGeometry, coinMaterial, coinTexture;
 var flyBoost, flyBoostGeometry, flyBoostMaterial, flyBoostTexture, flyBoostActivated = 0;
+var jumpBoost, jumpBoostGeometry, jumpBoostMaterial, jumpBoostTexture, jumpBoostActivated = 0;
+
 var crate, crateGeometry, crateMaterial, crateTexture, crateNormalMap, crateBumpMap;
 
 var gameOver = false, hitObstacle = 0;
@@ -213,7 +215,7 @@ function init() {
 	/*********** FLY BOOST **********/
 
 	flyBoostGeometry = new THREE.CircleGeometry(10, 32);
-	flyBoostTexture = textureLoader.load("assets/textures/jump.png");
+	flyBoostTexture = textureLoader.load("assets/textures/rocket.png");
 	flyBoostMaterial = new THREE.MeshBasicMaterial({color:0xffffff, map:flyBoostTexture});
 	flyBoost = new THREE.Mesh(flyBoostGeometry, flyBoostMaterial);
 	flyBoost.position.set(-2, -0.2, 20);
@@ -221,6 +223,18 @@ function init() {
 	flyBoost.rotation.z += Math.PI;
 	flyBoost.scale.set(0.05, 0.05, 0.05);
 	scene.add(flyBoost);
+
+	/*********** JUMP BOOST **********/
+
+	jumpBoostGeometry = new THREE.CircleGeometry(10, 32);
+	jumpBoostTexture = textureLoader.load("assets/textures/arrow.png");
+	jumpBoostMaterial = new THREE.MeshBasicMaterial({color:0xffffff, map:jumpBoostTexture});
+	jumpBoost = new THREE.Mesh(jumpBoostGeometry, jumpBoostMaterial);
+	jumpBoost.position.set(2, -0.2, 40);
+	jumpBoost.rotation.x += Math.PI;
+	jumpBoost.rotation.z += Math.PI;
+	jumpBoost.scale.set(0.05, 0.05, 0.05);
+	scene.add(jumpBoost);
 
 	/*********** MODELS ***********/
 
@@ -467,6 +481,22 @@ function animate() {
 		meshes["player"].position.y -= 3;
 	}
 
+	/**************** JUMP POWERUP *************/
+
+	if(detectCollision(meshes["player"], jumpBoost) && !jumpBoostActivated) {
+		jumpBoostActivated = 1;
+		jumpBoost.position.z = camera.position.z + 200;
+		player.maxHeight += 2;
+	}
+	if(jumpBoost.position.z < camera.position.z - 2) jumpBoost.position.z = camera.position.z + 100;
+	if(jumpBoostActivated) jumpBoostActivated += 1;
+	if(jumpBoostActivated > 300) {
+		jumpBoostActivated = 0;
+		player.maxHeight -= 1;
+	}
+
+
+	/*******************************************/
 	scoreText.innerHTML = "Score: " + player.score;
 
 	// Flashing walls
