@@ -57,6 +57,9 @@ var models = {
 };
 var meshes = {};
 
+
+
+
 function init() {
 
 	scene = new THREE.Scene();
@@ -76,6 +79,7 @@ function init() {
 	gameOverText.setAttribute('id', 'game-over-text');
 	gameOverText.innerHTML = "";
 	gameOverText.style.top = window.innerHeight / 2.4 + "px";
+	gameOverText.style.fontSize = "32px";
 	document.body.appendChild(gameOverText);
 
 	var loadingText = document.createElement('div');
@@ -238,31 +242,7 @@ function init() {
 
 	/*********** MODELS ***********/
 
-	for(var _key in models) {
-		(function(key){
-
-			var mtlLoader = new THREE.MTLLoader(loadingManager);
-			mtlLoader.load(models[key].mtl, function(materials) {
-
-				materials.preload();
-				var objLoader = new THREE.OBJLoader(loadingManager);
-				objLoader.setMaterials(materials);
-				objLoader.load(models[key].obj, function(mesh){
-
-					mesh.traverse(function(node) {
-						if( node instanceof THREE.Mesh) {
-							if( 'castShadow' in models[key] ) node.castShadow = models[key].castShadow;
-							else node.castShadow = true;
-
-							if( 'receiveShadow' in models[key] ) node.receiveShadow = models[key].castShadow;
-							else node.receiveShadow = true;
-						}
-					});
-					models[key].mesh = mesh;
-				});
-			});
-		})(_key);
-	}
+	loadModels();
 
 	/*********** LIGHT ***********/
 
@@ -292,6 +272,37 @@ function init() {
 
 	animate();
 }
+
+
+
+function loadModels() {
+	for(var _key in models) {
+		(function(key){
+
+			var mtlLoader = new THREE.MTLLoader(loadingManager);
+			mtlLoader.load(models[key].mtl, function(materials) {
+
+				materials.preload();
+				var objLoader = new THREE.OBJLoader(loadingManager);
+				objLoader.setMaterials(materials);
+				objLoader.load(models[key].obj, function(mesh){
+
+					mesh.traverse(function(node) {
+						if( node instanceof THREE.Mesh) {
+							if( 'castShadow' in models[key] ) node.castShadow = models[key].castShadow;
+							else node.castShadow = true;
+
+							if( 'receiveShadow' in models[key] ) node.receiveShadow = models[key].castShadow;
+							else node.receiveShadow = true;
+						}
+					});
+					models[key].mesh = mesh;
+				});
+			});
+		})(_key);
+	}
+}
+
 
 
 function createObjects() {
@@ -327,6 +338,7 @@ function createObjects() {
 }
 
 
+
 function animate() {
 	
 	if(gameOver) return;
@@ -338,15 +350,6 @@ function animate() {
 	}
 
 	requestAnimationFrame(animate);
-
-	// if(keyboard[67]) {
-	// 	wallMaterial.color.set(0x181818);
-	// 	trackMaterial.color.set(0x282828);
-	// }
-	// else {
-	// 	wallMaterial.color.set(0xffffff);
-	// 	trackMaterial.color.set(0xffffff);
-	// }
 
 	stats.begin();
 
@@ -495,8 +498,8 @@ function animate() {
 		player.maxHeight -= 1;
 	}
 
-
 	/*******************************************/
+	
 	scoreText.innerHTML = "Score: " + player.score;
 
 	// Flashing walls
@@ -549,6 +552,7 @@ function detectCollision(obj1, obj2) {
 }
 
 function endGame(message) {
+
 	// for(var i=0; i<leftWall.length; i++) scene.remove(leftWall[i]);
 	// for(var i=0; i<rightWall.length; i++) scene.remove(rightWall[i]);
 	// for(var i=0; i<track.length; i++) scene.remove(track[i]);
@@ -557,6 +561,7 @@ function endGame(message) {
 	scene.remove(meshes["player"]);
 	scene.remove(meshes["fence"]);
 	scene.remove(meshes["police"]);
+	scene.remove(jumpBoost);
 	scene.remove(flyBoost);
 	for(var i=0; i<coins.length; i++) scene.remove(coins[i]);
 	scene.remove(crate);
