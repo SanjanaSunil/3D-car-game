@@ -8,16 +8,14 @@ var rightWall = [], leftWall = [], wallTexture, wallGeometry, wallMaterial, wall
 var roof = [], roofTexture, roofGeometry, roofLen, roofFlag = false;
 
 var coins = [], coinGeometry, coinMaterial, coinTexture;
-
 var flyBoost, flyBoostGeometry, flyBoostMaterial, flyBoostTexture, flyBoostActivated = 0;
-
 var crate, crateGeometry, crateMaterial, crateTexture, crateNormalMap, crateBumpMap;
 
-var gameOver = false;
+var gameOver = false, hitObstacle = 0;
 
 var keyboard = {};
 var player = {
-				speed:0.2,
+				speed:0.4,
 				rightPosition:-1.8,
 				leftPosition:1.8,
 				jumpSpeed:0.2,
@@ -364,7 +362,9 @@ function animate() {
 	camera.lookAt.z += player.speed;
 	light.position.z += player.speed;
 	meshes["player"].position.z += player.speed;
-	meshes["police"].position.z += player.speed / 1.05;
+
+	if(!hitObstacle) meshes["police"].position.z += player.speed / 1.05;
+	else meshes["police"].position.z += player.speed;
 	meshes["police"].position.x = meshes["player"].position.x;
 
 	/******** Rerendering to create infinite illusion ********/
@@ -484,6 +484,15 @@ function animate() {
 		if(detectCollision(meshes[gateNo], meshes["player"])) endGame("You lost!");
 	}
 
+	if(detectCollision(meshes["player"], meshes["fence"])) {
+		if(!hitObstacle) {
+			hitObstacle = time;
+			player.speed -= 0.15;
+			meshes["police"].position.z = meshes["player"].position.z - 1.5;
+		}
+		else if(hitObstacle + 4 < time) endGame("You lost!");
+	}
+
 	renderer.render(scene, camera);
 	stats.end();
 }
@@ -510,13 +519,14 @@ function detectCollision(obj1, obj2) {
 }
 
 function endGame(message) {
-	for(var i=0; i<leftWall.length; i++) scene.remove(leftWall[i]);
-	for(var i=0; i<rightWall.length; i++) scene.remove(rightWall[i]);
-	for(var i=0; i<track.length; i++) scene.remove(track[i]);
-	for(var i=0; i<roof.length; i++) scene.remove(roof[i]);
+	// for(var i=0; i<leftWall.length; i++) scene.remove(leftWall[i]);
+	// for(var i=0; i<rightWall.length; i++) scene.remove(rightWall[i]);
+	// for(var i=0; i<track.length; i++) scene.remove(track[i]);
+	// for(var i=0; i<roof.length; i++) scene.remove(roof[i]);
 	
 	scene.remove(meshes["player"]);
 	scene.remove(meshes["fence"]);
+	scene.remove(meshes["police"]);
 	scene.remove(flyBoost);
 	for(var i=0; i<coins.length; i++) scene.remove(coins[i]);
 	scene.remove(crate);
